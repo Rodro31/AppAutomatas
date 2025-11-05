@@ -1,0 +1,90 @@
+body {
+  font-family: Consolas, monospace;
+  text-align: center;
+  background-color: #f4f6f7;
+  margin-top: 40px;
+}
+
+h1 {
+  color: #6a1b9a; /* morado */
+}
+
+input {
+  width: 260px;
+  padding: 8px;
+  margin: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #6a1b9a; /* morado por defecto para botones principales */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #4a0f66; /* morado más oscuro al pasar el ratón */
+}
+
+pre {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 80%;
+  margin: 20px auto;
+  padding: 15px;
+  box-shadow: 0 0 5px gray;
+  white-space: pre-wrap;
+}
+
+/* Estilos para el diagrama incluido en la app */
+#diagramaContainer {
+  width: 90%;
+  margin: 10px auto;
+}
+#diagrama {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  border-radius: 6px;
+}
+
+/* Layout de dos columnas: muestras a la izquierda, formulario a la derecha */
+.app-grid {
+  display: flex;
+  gap: 20px;
+  width: 90%;
+  margin: 0 auto 12px;
+  align-items: flex-start;
+}
+.left-column {
+  width: 220px;
+  text-align: left;
+}
+.right-column {
+  flex: 1;
+  text-align: center;
+}
+.sample {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #000; /* texto negro para los botones de muestra */
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.sample:hover { background:#f0f6fb; }
+.small { font-size: 12px; color:#666; }

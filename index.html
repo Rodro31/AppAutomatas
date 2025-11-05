@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Maquina de Touring - Resta Binaria</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Maquina de Touring Resta Binaria</h1>
+
+  <div class="app-grid">
+    <div class="left-column">
+      <h3>Casos de prueba</h3>
+      <div id="samples">
+        <button class="sample" onclick="selectSample('1010-0011')">1010-0011</button>
+        <button class="sample" onclick="selectSample('1110-0101')">1110-0101</button>
+        <button class="sample" onclick="selectSample('1001-0001')">1001-0001</button>
+        <button class="sample" onclick="selectSample('1101-1010')">1101-1010</button>
+        <button class="sample" onclick="selectSample('1001-0110')">1001-0110</button>
+        <button class="sample" onclick="selectSample('10-01')">10-01</button>
+      </div>
+      <p class="small">Haz clic en una cadena para copiarla y cargarla en la entrada.</p>
+    </div>
+
+    <div class="right-column">
+      <label for="txtEntrada">Ingrese su resta (deben de ser del mismo tamaño Ejemplo: 1001-0110):</label><br>
+      <input type="text" id="txtEntrada" placeholder="Ejemplo: 1010-0011">
+      <br><br>
+
+      <button id="btnGenerar">Generar ID</button>
+
+      <h2>Resultado:</h2>
+      <pre id="lblResultado">—</pre>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+
+  <!-- Diagrama colocado lo más abajo posible en el body -->
+  <div id="diagramaContainer">
+    <img src="RestaBinaria.png" id="diagrama" alt="Diagrama Resta Binaria">
+  </div>
+</body>
+</html>
