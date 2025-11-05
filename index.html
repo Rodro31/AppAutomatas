@@ -20,6 +20,16 @@
         <button class="sample" onclick="selectSample('10-01')">10-01</button>
       </div>
       <p class="small">Haz clic en una cadena para copiarla y cargarla en la entrada.</p>
+      <!-- Séptupla y tabla de transiciones siempre visibles en la columna izquierda -->
+      <section id="septupleSection">
+        <h3>Séptupla del autómata</h3>
+        <pre id="septuple">(cargando...)</pre>
+      </section>
+
+      <section id="transitionsSection">
+        <h3>Tabla de transiciones (δ)</h3>
+        <div id="transitions">(cargando...)</div>
+      </section>
     </div>
 
     <div class="right-column">
@@ -30,15 +40,26 @@
       <button id="btnGenerar">Generar ID</button>
 
       <h2>Resultado:</h2>
-      <pre id="lblResultado">—</pre>
+      <div id="acceptMessage" aria-live="polite" style="margin-bottom:8px; font-weight:600;">—</div>
+      <div id="lblResultado">
+        <pre id="rawID">—</pre>
+      </div>
+
+      <!-- septupla and transitions moved to left column -->
+
+      <div class="steps-diagram">
+        <section id="stepsSection">
+          <h3>Pasos ejecutados</h3>
+          <ol id="stepsList"></ol>
+        </section>
+      </div>
+
+      <div id="diagramaContainer">
+        <img src="RestaBinaria.png" id="diagrama" alt="Diagrama Resta Binaria">
+      </div>
     </div>
   </div>
 
   <script src="main.js"></script>
-
-  <!-- Diagrama colocado lo más abajo posible en el body -->
-  <div id="diagramaContainer">
-    <img src="RestaBinaria.png" id="diagrama" alt="Diagrama Resta Binaria">
-  </div>
 </body>
 </html>

@@ -57,6 +57,20 @@ pre {
   border-radius: 6px;
 }
 
+/* Contenedor que alinea la imagen con el cuadro de pasos */
+.steps-diagram {
+  display: block; /* ahora sólo contiene la lista de pasos */
+  margin-top: 10px;
+}
+
+#diagramaContainer {
+  text-align: center;
+  margin-top: 12px;
+}
+#diagrama { max-width: 640px; width: 100%; height: auto; display: inline-block; }
+
+ 
+
 /* Layout de dos columnas: muestras a la izquierda, formulario a la derecha */
 .app-grid {
   display: flex;
@@ -66,8 +80,11 @@ pre {
   align-items: flex-start;
 }
 .left-column {
-  width: 220px;
+  width: 360px;
   text-align: left;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  padding-right: 8px;
 }
 .right-column {
   flex: 1;
@@ -88,3 +105,63 @@ pre {
 }
 .sample:hover { background:#f0f6fb; }
 .small { font-size: 12px; color:#666; }
+
+/* Nuevas secciones: séptupla, transiciones y pasos */
+#septupleSection, #transitionsSection, #stepsSection {
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+#transitions table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#transitions th, #transitions td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+#acceptMessage {
+  font-size: 15px;
+}
+
+#stepsList { padding-left: 18px; }
+
+/* Mejorar visualización de pasos: columnas y evitar romper items */
+#stepsSection { overflow: visible; }
+#stepsList {
+  padding-left: 0; /* usamos list-style-position inside */
+  margin: 0;
+  column-gap: 40px;
+  -webkit-column-gap: 40px;
+  /* columnas fluidas: 2 columnas por defecto, 3 en pantallas grandes */
+  column-count: 2;
+  -webkit-column-count: 2;
+  list-style-position: inside;
+}
+#stepsList li {
+  break-inside: avoid; /* evitar que un item se rompa entre columnas */
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  padding: 4px 0;
+  white-space: pre-wrap; /* permitir saltos de línea naturales */
+  word-break: break-word;
+}
+
+@media (min-width: 1200px) {
+  #stepsList { column-count: 3; -webkit-column-count: 3; }
+}
+
+@media (max-width: 700px) {
+  #stepsList { column-count: 1; -webkit-column-count: 1; }
+}
+
+/* Asegurarnos de que la columna izquierda se vea bien en pantallas pequeñas */
+@media (max-width: 800px) {
+  .app-grid { flex-direction: column; }
+  .left-column { width: 100%; max-height: none; }
+}

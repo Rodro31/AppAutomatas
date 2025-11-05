@@ -1,6 +1,78 @@
 // Simulador completo de la Máquina de Turing con generación de ID paso a paso
 document.getElementById("btnGenerar").addEventListener("click", generarID);
 
+// Al cargar la página, renderizamos la séptupla y la tabla usando las transiciones
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    renderStaticSeptupleAndTable();
+  } catch (e) {
+    // no bloquear la página si algo falla
+    console.error('Error al renderizar la séptupla estática:', e);
+  }
+});
+
+// Renderiza la séptupla y la tabla de transiciones sin ejecutar la máquina
+function renderStaticSeptupleAndTable() {
+  const tm = new TuringMachine('0-0'); // sólo para obtener transitions
+  const septElem = document.getElementById('septuple');
+  const transElem = document.getElementById('transitions');
+
+  // Construir datos (reutilizamos el mismo formato que en generarID)
+  const gammaSet = new Set(['_']);
+  for (const s of Object.keys(tm.transitions)) {
+    const row = tm.transitions[s];
+    for (const k of Object.keys(row)) gammaSet.add(k);
+    for (const v of Object.values(row)) {
+      if (Array.isArray(v)) gammaSet.add(v[1]);
+    }
+  }
+  const sigmaSet = Array.from(gammaSet).filter(s => s !== '_');
+
+  // delta lines
+  const deltaLines = [];
+  for (const st of Object.keys(tm.transitions)) {
+    const row = tm.transitions[st];
+    for (const sym of Object.keys(row)) {
+      const [ns, nSym, dir] = row[sym];
+      deltaLines.push(`(${st},${sym}) = (${ns},${nSym},${dir})`);
+    }
+  }
+
+  if (septElem) {
+    const septLines = [];
+    septLines.push(`M={Q,Σ,Γ,δ,A,H,_}`);
+    septLines.push(`Q={${Object.keys(tm.transitions).join(',')}}`);
+    septLines.push(`Σ={${sigmaSet.join(',')}}`);
+    septLines.push(`Γ={${Array.from(gammaSet).join(',')}}`);
+    septLines.push(`δ={ ${deltaLines.join(', ')} }`);
+    septElem.innerText = septLines.join('\n');
+  }
+
+  if (transElem) {
+    // misma tabla que en generarID
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const hrow = document.createElement('tr');
+    ['Estado', 'Símbolo', 'Nuevo Estado', 'Nuevo Símbolo', 'Dirección'].forEach(h => {
+      const th = document.createElement('th'); th.innerText = h; hrow.appendChild(th);
+    });
+    thead.appendChild(hrow); table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    for (const st of Object.keys(tm.transitions)) {
+      const row = tm.transitions[st];
+      for (const sym of Object.keys(row)) {
+        const [ns, nSym, dir] = row[sym];
+        const tr = document.createElement('tr');
+        [st, sym, ns, nSym, dir].forEach(x => { const td = document.createElement('td'); td.innerText = x; tr.appendChild(td); });
+        tbody.appendChild(tr);
+      }
+    }
+    table.appendChild(tbody);
+    transElem.innerHTML = '';
+    transElem.appendChild(table);
+  }
+}
+
 // Permite seleccionar/usar una cadena de prueba desde la columna izquierda.
 function selectSample(value) {
   const input = document.getElementById('txtEntrada');
@@ -249,10 +321,19 @@ class TuringMachine {
         break;
       }
     }
+    // Construir resultado enriquecido
+    const accepted = this.state === 'H';
+    let reason = '';
+    if (accepted) reason = 'Aceptada (se alcanzó el estado H)';
+    else if (this.history.length && this.history[this.history.length-1].includes('... (posible bucle)')) reason = 'Detenida: posible bucle';
+    else reason = `Rechazada (detenida en estado ${this.state} sin transición)`;
 
-    // Devolver solo la secuencia de configuraciones; el llamador puede
-    // prefijar 'ID:' si lo desea.
-    return this.history.join(' |- ');
+    return {
+      history: this.history.slice(),
+      accepted,
+      reason,
+      finalState: this.state
+    };
   }
 }
 
@@ -298,7 +379,104 @@ function generarID() {
 
   // Creamos la máquina pasando la cadena original (sin agregar '_' aquí)
   const tm = new TuringMachine(entrada, { maxSteps: 20000, mode: viewMode, windowSize });
-  const id = tm.run();
-  salida.innerText = 'ID: ' + id;
+  // Ejecutar
+  const result = tm.run();
+
+  // Mostrar séptupla y tabla de transiciones
+  const septElem = document.getElementById('septuple');
+  const transElem = document.getElementById('transitions');
+  const acceptElem = document.getElementById('acceptMessage');
+  const rawIDElem = document.getElementById('rawID');
+  const stepsList = document.getElementById('stepsList');
+
+  // Septupla: Q, Σ, Γ, δ, q0, q_accept, B
+  if (septElem) {
+    const Q = Object.keys(tm.transitions).concat(['H']).join(', ');
+    const Sigma = ['0','1','-'].join(', ');
+    // construir conjunto de símbolos de cinta Γ a partir de transiciones y valores
+    const gammaSet = new Set(['_']);
+    for (const s of Object.keys(tm.transitions)) {
+      const row = tm.transitions[s];
+      for (const k of Object.keys(row)) gammaSet.add(k);
+      for (const v of Object.values(row)) {
+        if (Array.isArray(v)) gammaSet.add(v[1]);
+      }
+    }
+    const Gamma = Array.from(gammaSet).join(', ');
+    const q0 = 'A';
+    const q_accept = 'H';
+    const B = '_';
+
+    // Construir representación textual de δ (lista de funciones de transición)
+    const deltaLines = [];
+    for (const st of Object.keys(tm.transitions)) {
+      const row = tm.transitions[st];
+      for (const sym of Object.keys(row)) {
+        const [ns, nSym, dir] = row[sym];
+        deltaLines.push(`δ(${st}, ${sym}) = (${ns}, ${nSym}, ${dir})`);
+      }
+    }
+
+    // Formato solicitado por el usuario: M={Q,Σ,Γ,δ,A,H,_} y conjuntos explícitos
+    // Construir Σ y Γ a partir de gammaSet (excluimos '_' de Σ)
+    const sigmaSet = Array.from(gammaSet).filter(s => s !== '_');
+
+    const septLines = [];
+    septLines.push(`M={Q,Σ,Γ,δ,A,H,_}`);
+    septLines.push(`Q={${Object.keys(tm.transitions).join(',')}}`);
+    septLines.push(`Σ={${sigmaSet.join(',')}}`);
+    septLines.push(`Γ={${Array.from(gammaSet).join(',')}}`);
+    // δ en una sola línea con comas (imitando la notación dada)
+    const deltaBody = deltaLines.map(l => l.replace(/^δ\(|\)$/g, m => m)).map(l => {
+      // convertir 'δ(A, 0) = (A, 0, R)' a '(A,0) = (A,0,R)'
+      return l.replace(/^δ\(([^,]+), ([^\)]+)\) = \(([^,]+), ([^,]+), ([^\)]+)\)$/,
+        '($1,$2) = ($3,$4,$5)');
+    }).join(', ');
+    septLines.push(`δ={ ${deltaBody} }`);
+
+    septElem.innerText = septLines.join('\n');
+  }
+
+  if (transElem) {
+    // construir una tabla HTML simple
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const hrow = document.createElement('tr');
+    ['Estado', 'Símbolo', 'Nuevo Estado', 'Nuevo Símbolo', 'Dirección'].forEach(h => {
+      const th = document.createElement('th'); th.innerText = h; hrow.appendChild(th);
+    });
+    thead.appendChild(hrow); table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    for (const st of Object.keys(tm.transitions)) {
+      const row = tm.transitions[st];
+      for (const sym of Object.keys(row)) {
+        const [ns, nSym, dir] = row[sym];
+        const tr = document.createElement('tr');
+        [st, sym, ns, nSym, dir].forEach(x => { const td = document.createElement('td'); td.innerText = x; tr.appendChild(td); });
+        tbody.appendChild(tr);
+      }
+    }
+    table.appendChild(tbody);
+    transElem.innerHTML = '';
+    transElem.appendChild(table);
+  }
+
+  // Mostrar aceptación / rechazo
+  if (acceptElem) {
+    acceptElem.innerText = result.reason || '';
+    acceptElem.style.color = result.accepted ? '#0a7f3a' : '#c0392b';
+  }
+
+  // Mostrar ID en el formato original (cadena única con ' |- ') y pasos numerados
+  if (salida) salida.innerText = 'ID: ' + result.history.join(' |- ');
+  if (rawIDElem) rawIDElem.innerText = result.history.join(' |- ');
+  if (stepsList) {
+    stepsList.innerHTML = '';
+    for (let i = 0; i < result.history.length; i++) {
+      const li = document.createElement('li');
+      li.innerText = result.history[i];
+      stepsList.appendChild(li);
+    }
+  }
 }
 
